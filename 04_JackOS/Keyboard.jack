@@ -1,0 +1,150 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Keyboard.jack
+
+/**
+ * A library for handling user input from the keyboard.
+ */
+class Keyboard {
+
+    static int kbd;
+
+    /** Initializes the keyboard. */
+    function void init() {
+      let kbd = 24576;
+      return;
+    }
+
+    /**
+     * Returns the ASCII code (as char) of the currently pressed key,
+     * or 0 if no key is currently pressed.
+     * Recognizes all ASCII characters, as well as the following extension
+     * of action keys:
+     * New line = 128 = String.newline()
+     * Backspace = 129 = String.backspace()
+     * Left Arrow = 130
+     * Up Arrow = 131
+     * Right Arrow = 132
+     * Down Arrow = 133
+     * Home = 134
+     * End = 135
+     * Page Up = 136
+     * Page Down = 137
+     * Insert = 138
+     * Delete = 139
+     * ESC = 140
+     * F1 - F12 = 141 - 152
+     */
+    function char keyPressed() {
+      return Memory.peek(kbd);
+    }
+
+    /**
+     * Reads the next character from the keyboard.
+     * waits until a key is pressed and then released, then echoes
+     * the key to the screen, and returns the value of the pressed key.
+     */
+    function char readChar() {
+      var char current, next;
+      let current = Keyboard.keyPressed();
+      do Output.printChar(95);
+      while(current = 0) {
+        let current = Keyboard.keyPressed();
+        let next = current;
+      }
+      while(~(next = 0)) {
+        let next = Keyboard.keyPressed();
+      }
+      do Output.backSpace();
+      do Output.printChar(current);
+      return current;
+    }
+
+    // same as readChar but doesn't echo to screen
+    function char getChar() {
+      var char current, next;
+      let current = Keyboard.keyPressed();
+      do Output.printChar(95);
+      while(current = 0) {
+        let current = Keyboard.keyPressed();
+        let next = current;
+      }
+      while(~(next = 0)) {
+        let next = Keyboard.keyPressed();
+      }
+      do Output.backSpace();
+      return current;
+    }
+
+    /**
+     * Prints the message on the screen, reads the next line
+     * (until a newline character) from the keyboard, and returns its value.
+     */
+    function String readLine(String message) {
+      var String s, str;
+      var char c;
+      var int i;
+      do Output.printString(message);
+      let s = String.new(64);
+      while(true) {
+        let c = Keyboard.getChar();
+        if(c = String.newLine()) {
+          let str = String.new(s.length());
+          let i = 0;
+          while(i < s.length()) {
+            let str = str.appendChar(s.charAt(i));
+            let i = i + 1;
+          }
+          do Memory.deAlloc(s);
+          do Output.println();
+          return str;
+        } else {
+          if(c = String.backSpace()) {
+            do s.eraseLastChar();
+            do Output.backSpace();
+          } else {
+            let s = s.appendChar(c);
+            do Output.printChar(c);
+          }
+        }
+      }
+      return s;
+    }
+
+    /**
+     * Prints the message on the screen, reads the next line
+     * (until a newline character) from the keyboard, and returns its
+     * integer value (until the first non numeric character).
+     */
+    function int readInt(String message) {
+      var String s, str;
+      var char c;
+      var int i;
+      do Output.printString(message);
+      let s = String.new(64);
+      while(true) {
+        let c = Keyboard.getChar();
+        if(c = String.newLine()) {
+          let str = String.new(s.length());
+          let i = 0;
+          while(i < s.length()) {
+            let str = str.appendChar(s.charAt(i));
+            let i = i + 1;
+          }
+          do Memory.deAlloc(s);
+          do Output.println();
+          return str.intValue();
+        } else {
+          if(c = String.backSpace()) {
+            do s.eraseLastChar();
+            do Output.backSpace();
+          } else {
+              let s = s.appendChar(c);
+              do Output.printChar(c);
+          }
+        }
+      }
+      return s;
+    }
+}

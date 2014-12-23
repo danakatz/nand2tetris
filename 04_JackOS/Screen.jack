@@ -1,0 +1,317 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * Graphic screen library.
+ */
+class Screen {
+
+    static int screen, kbd;
+    static boolean color;
+
+    /** Initializes the Screen. */
+    function void init() {
+      let screen = 16384;
+      let kbd = 24576;
+      let color = true;
+      return;
+    }
+
+    /** Erases the whole screen. */
+    function void clearScreen() {
+      var int i;
+      let i = screen;
+      while(i < kbd) {
+        do Memory.poke(i, 0);
+        let i = i + 1;
+      }
+      return;
+     }
+
+    /** Sets the color to be used in further draw commands
+     *  where white = false, black = true. */
+    function void setColor(boolean b) {
+      let color = b;
+      return;
+    }
+
+    /** Draws the (x, y) pixel. */
+    function void drawPixel(int x, int y) {
+      var int mem, mod;
+      if((x < 0) | ~(x < 512)) {  // check for illegal x coordinate
+        do Sys.error(7);
+      }
+      if((y < 0) | ~(y < 256)) {  // check for illegal y coordinate
+        do Sys.error(7);
+      }
+      let mem = screen + Math.multiply(y, 32) + Math.divide(x, 16);
+      let mod = Math.divide(x, 16);
+      let mod = x - Math.multiply(mod, 16);
+
+      if(mod = 15) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | -(16384 + 16384)));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & 32767));
+        }
+      }
+      if(mod = 14) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 16384));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -16385));
+        }
+
+      }
+      if(mod = 13) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 8192));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -8193));
+        }
+
+      }
+      if(mod = 12) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 4096));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -4097));
+        }
+      }
+      if(mod = 11) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 2048));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -2049));
+        }
+      }
+      if(mod = 10) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 1024));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -1025));
+        }
+      }
+      if(mod = 9) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 512));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -513));
+        }
+      }
+      if(mod = 8) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 256));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -257));
+        }
+      }
+      if(mod = 7) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 128));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -129));
+        }
+      }
+      if(mod = 6) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 64));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -65));
+        }
+      }
+      if(mod = 5) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 32));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -33));
+        }
+      }
+      if(mod = 4) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 16));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -17));
+        }
+      }
+      if(mod = 3) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 8));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -9));
+        }
+      }
+      if(mod = 2) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 4));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -5));
+        }
+      }
+      if(mod = 1) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 2));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -3));
+        }
+      }
+      if(mod = 0) {
+        if(color) {
+          do Memory.poke(mem, (Memory.peek(mem) | 1));
+        } else {
+          do Memory.poke(mem, (Memory.peek(mem) & -2));
+        }
+      }
+      return;
+    }
+
+    /** Draws a line from (x1, y1) to (x2, y2). */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+      var int dx, dy, a, b, adyMinusbdx;
+      // check for illegal x coordinates
+      if(((x1 < 0) | ~(x1 < 512)) | ((x2 < 0) | ~(x2 < 512))) {
+        do Sys.error(8);
+      }
+      // check for illegal y coordinates
+      if(((y1 < 0) | ~(y1 < 256)) | ((y2 < 0) | ~(y2 < 256))) {
+        do Sys.error(8);
+      }
+
+      let dx = x2 - x1;
+      let dy = y2 - y1;
+      if((dx = 0) & (dy = 0)) {
+        do Screen.drawPixel(x1, y1);
+        return;
+      }
+
+      if(dx = 0) {        // vertical line
+        if(dy > 0) {
+          while(~(y1 > y2)) {
+            do Screen.drawPixel(x1, y1);
+            let y1 = y1 + 1;
+          }
+        } else {
+          while(~(y1 < y2)) {
+            do Screen.drawPixel(x1, y1);
+            let y1 = y1 - 1;
+          }
+        }
+
+        return;
+      }
+
+      if(dy = 0) {        // horizontal line
+        if(dx > 0) {
+          while(~(x1 > x2)) {
+            do Screen.drawPixel(x1, y1);
+            let x1 = x1 + 1;
+          }
+        } else {
+          while(~(x1 < x2)) {
+            do Screen.drawPixel(x1, y1);
+            let x1 = x1 - 1;
+          }
+        }
+        return;
+      }
+
+      // diagonal line
+      let adyMinusbdx = 0;
+      let a = 0;
+      let b = 0;
+      while(~(Math.abs(a) > Math.abs(dx)) & ~(Math.abs(b) > Math.abs(dy))) {
+        do Screen.drawPixel(x1 + a, y1 + b);
+        if(adyMinusbdx < 0) {
+          if((dx > 0) & (dy > 0)) {
+            let a = a + 1;
+            let adyMinusbdx = adyMinusbdx + dy;
+          }
+          if((dx > 0) & (dy < 0)) {
+            let a = a + 1;
+            let adyMinusbdx = adyMinusbdx - dy;
+          }
+          if((dx < 0) & (dy > 0)) {
+            let a = a - 1;
+            let adyMinusbdx = adyMinusbdx + dy;
+          }
+          if((dx < 0) & (dy < 0)) {
+            let a = a - 1;
+            let adyMinusbdx = adyMinusbdx - dy;
+          }
+        } else {
+          if((dy > 0) & (dx > 0)) {
+            let b = b + 1;
+            let adyMinusbdx = adyMinusbdx - dx;
+          }
+          if((dy > 0) & (dx < 0)) {
+            let b = b + 1;
+            let adyMinusbdx = adyMinusbdx + dx;
+          }
+          if((dy < 0) & (dx > 0)) {
+            let b = b - 1;
+            let adyMinusbdx = adyMinusbdx - dx;
+          }
+          if((dy < 0) & (dx < 0)) {
+            let b = b - 1;
+            let adyMinusbdx = adyMinusbdx + dx;
+          }
+        }
+      }
+      return;
+    }
+
+    /** Draws a filled rectangle where the top left corner
+     *  is (x1, y1) and the bottom right corner is (x2, y2). */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+      // make sure (x1, y1) is top left and (x2, y2) is bottom right
+      if(~(x2 > x1) | ~(y2 > y1)) {
+        do Sys.error(9);
+      }
+      // check for illegal x coordinates
+      if(((x1 < 0) | ~(x1 < 512)) | ((x2 < 0) | ~(x2 < 512))) {
+        do Sys.error(9);
+      }
+      // check for illegal y coordinates
+      if(((y1 < 0) | ~(y1 < 256)) | ((y2 < 0) | ~(y2 < 256))) {
+        do Sys.error(9);
+      }
+
+      while(y1 < y2) {
+        do Screen.drawLine(x1, y1, x2, y1);
+        let y1 = y1 + 1;
+      }
+      do Screen.drawLine(x1, y2, x2, y2);
+      return;
+    }
+
+    /** Draws a filled circle of radius r around (cx, cy). */
+    function void drawCircle(int cx, int cy, int r) {
+      var int dy, term;
+      if((cx < 0) | ~(cx < 512)) {  // check for illegal x coordinate
+        do Sys.error(12);
+      }
+      if((cy < 0) | ~(cy < 256)) {  // check for illegal y coordinate
+        do Sys.error(12);
+      }
+      // check for illegal radius
+      if(((cx + r) > 511) | ((cx - r) < 0)) {
+        do Sys.error(13);
+      }
+      if(((cy + r) > 255) | ((cy - r) < 0)) {
+        do Sys.error(13);
+      }
+      if(r > 181) {
+        do Sys.error(13);
+      }
+
+      let dy = -r;
+      while(~(dy > r)) {
+        let term = Math.sqrt(Math.multiply(r, r) - Math.multiply(dy, dy));
+        do Screen.drawLine((cx - term), cy + dy, (cx + term), cy + dy);
+        let dy = dy + 1;
+      }
+      return;
+    }
+}
